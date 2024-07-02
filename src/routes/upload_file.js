@@ -8,14 +8,6 @@ const router = express.Router();
 router.use(express.urlencoded({ extended: true }));
 router.use(express.json());
 
-const verifyRFC = (req, res, next) => {
-  console.log('Verificando RFC:', req.body.rfc);
-  if (!req.body.rfc) {
-    return res.status(400).send({ message: 'Please provide an RFC' });
-  }
-  next();
-};
-
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const rfc = req.body.rfc;
@@ -39,25 +31,30 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage: storage }).single('file');
 
-router.post('/upload', express.urlencoded({ extended: true }), (req, res, next) => {
-  console.log('Verificando RFC en pre-middleware:', req.body.rfc);
-  if (!req.body.rfc) {
-    return res.status(400).send({ message: 'Please provide an RFC' });
-  }
-  next();
-}, upload.single('file'), (req, res) => {
-  console.log('Archivo recibido:', req.file);
-  console.log('Request Body:', req.body);
+router.post('/upload', (req, res, next) => {
+  upload(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      return res.status(500).send({ message: err.message });
+    } else if (err) {
+      return res.status(500).send({ message: err.message });
+    }
 
-  const rfc = req.body.rfc;
-  const filename = req.file.originalname;
-  const filePath = path.join('uploads', rfc, filename);
+    const rfc = req.body.rfc;
+    console.log('Verificando RFC:', rfc);
 
-  res.send({
-    message: 'File uploaded successfully',
-    filePath: filePath
+    if (!rfc) {
+      return res.status(400).send({ message: 'Please provide an RFC' });
+    }
+
+    const filename = req.file.originalname;
+    const filePath = path.join('uploads', rfc, filename);
+
+    res.send({
+      message: 'File uploaded successfully',
+      filePath: filePath
+    });
   });
 });
 
