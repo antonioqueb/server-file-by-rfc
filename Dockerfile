@@ -1,14 +1,22 @@
-# Dockerfile
-FROM node:14-alpine
+# Use the official Node.js image.
+# https://hub.docker.com/_/node
+FROM node:14
 
+# Create and change to the app directory.
 WORKDIR /usr/src/app
 
+# Copy application dependency manifests to the container image.
+# A wildcard is used to ensure both package.json AND package-lock.json are copied.
 COPY package*.json ./
 
-RUN npm install --production
+# Install dependencies.
+RUN npm install
 
+# Copy the local code to the container image.
 COPY . .
 
-EXPOSE 3011
+# Expose the port the app runs on.
+EXPOSE 3009
 
-CMD ["node", "src/index_file.js"]
+# Run the web service on container startup.
+CMD [ "npm", "start" ]

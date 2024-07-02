@@ -11,15 +11,8 @@ router.use(express.json());
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const rfc = req.body.rfc;
-    console.log('RFC en storage:', rfc);
-
-    if (!rfc) {
-      return cb(new Error('RFC is required'), null);
-    }
-
-    const uploadPath = path.join('uploads', rfc);
-
-    // Crea el directorio si no existe
+    const uploadPath = path.join(__dirname, '../../uploads', rfc);
+    
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }
@@ -31,55 +24,25 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage: storage }).single('file');
+const upload = multer({ storage: storage });
 
-router.post('/upload', (req, res, next) => {
-  upload(req, res, function (err) {
-    if (err instanceof multer.MulterError) {
-      return res.status(500).send({ message: err.message });
-    } else if (err) {
-      return res.status(500).send({ message: err.message });
-    }
+const verifyRFC = (req, res, next) => {
+  console.log('Verificando RFC:', req.body.rfc);
+  if (!req.body.rfc) {
+    return res.status(400).send({ message: 'Por favor proporciona un RFC' });
+  }
+  next();
+};
 
-    const rfc = req.body.rfc;
-    console.log('Verificando RFC:', rfc);
-
-    if (!rfc) {
-      return res.status(400).send({ message: 'Please provide an RFC' });
-    }
-
-    const filename = req.file.originalname;
-    const filePath = path.join('uploads', rfc, filename);
-
-    res.send({
-      message: 'File uploaded successfully',
-      filePath: filePath
-    });
-  });
-});
-
-router.get('/list', (req, res) => {
-  const rfc = req.query.rfc;
-
-  if (!rfc) {
-    return res.status(400).send({ message: 'Please provide an RFC' });
+router.post('/', verifyRFC, upload.any(), (req, res) => {
+  console.log('Archivos recibidos:', req.files);
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).send({ message: 'Por favor sube al menos un archivo' });
   }
 
-  const uploadPath = path.join('uploads', rfc);
-
-  if (!fs.existsSync(uploadPath)) {
-    return res.status(400).send({ message: 'RFC directory does not exist' });
-  }
-
-  fs.readdir(uploadPath, (err, files) => {
-    if (err) {
-      return res.status(500).send({ message: 'Error reading directory' });
-    }
-
-    res.send({
-      rfc: rfc,
-      files: files
-    });
+  res.send({
+    message: 'Archivos subidos exitosamente',
+    files: req.files.map(file => file.originalname)
   });
 });
 
