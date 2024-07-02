@@ -33,20 +33,14 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post('/upload', (req, res, next) => {
-  console.log('Verificando RFC:', req.body.rfc);
-  if (!req.body.rfc) {
-    return res.status(400).send({ message: 'Please provide an RFC' });
-  }
-  next();
-}, upload.single('file'), (req, res) => {
-  console.log('Archivo recibido:', req.file);
-  console.log('Request Body:', req.body);
-  if (!req.body.rfc) {
-    return res.status(400).send({ message: 'Please provide an RFC' });
-  }
-
+router.post('/upload', upload.single('file'), (req, res) => {
   const rfc = req.body.rfc;
+  console.log('Verificando RFC:', rfc);
+  
+  if (!rfc) {
+    return res.status(400).send({ message: 'Please provide an RFC' });
+  }
+  
   const filename = req.file.originalname;
   const filePath = path.join('uploads', rfc, filename);
 
