@@ -1,4 +1,3 @@
-// src\routes\upload_file.js
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
@@ -12,6 +11,11 @@ router.use(express.json());
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const rfc = req.body.rfc;
+
+    if (!rfc) {
+      return cb(new Error('RFC is required'), null);
+    }
+
     const uploadPath = path.join('uploads', rfc);
 
     // Crea el directorio si no existe
@@ -36,7 +40,7 @@ const verifyRFC = (req, res, next) => {
   next();
 };
 
-router.post('/upload', upload.single('file'), verifyRFC, (req, res) => {
+router.post('/upload', verifyRFC, upload.single('file'), (req, res) => {
   console.log('Archivo recibido:', req.file);
   if (!req.file) {
     return res.status(400).send({ message: 'Please upload a file' });
