@@ -5,9 +5,6 @@ const fs = require('fs');
 
 const router = express.Router();
 
-router.use(express.urlencoded({ extended: true }));
-router.use(express.json());
-
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const rfc = req.body.rfc;
@@ -35,7 +32,7 @@ const verifyRFC = (req, res, next) => {
   next();
 };
 
-router.post('/', verifyRFC, upload.any(), (req, res) => {
+router.post('/', upload.any(), verifyRFC, (req, res) => { // Mover upload.any() antes de verifyRFC
   console.log('Archivos recibidos:', req.files);
   if (!req.files || req.files.length === 0) {
     return res.status(400).send({ message: 'Por favor sube al menos un archivo' });
