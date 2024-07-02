@@ -8,14 +8,6 @@ const router = express.Router();
 router.use(express.urlencoded({ extended: true }));
 router.use(express.json());
 
-const verifyRFC = (req, res, next) => {
-  console.log('Verificando RFC:', req.body.rfc);
-  if (!req.body.rfc) {
-    return res.status(400).send({ message: 'Please provide an RFC' });
-  }
-  next();
-};
-
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const rfc = req.body.rfc;
@@ -41,7 +33,13 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post('/upload', upload.single('file'), (req, res) => {
+router.post('/upload', (req, res, next) => {
+  console.log('Verificando RFC:', req.body.rfc);
+  if (!req.body.rfc) {
+    return res.status(400).send({ message: 'Please provide an RFC' });
+  }
+  next();
+}, upload.single('file'), (req, res) => {
   console.log('Archivo recibido:', req.file);
   console.log('Request Body:', req.body);
   if (!req.body.rfc) {
