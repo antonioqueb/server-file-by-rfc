@@ -8,25 +8,6 @@ const router = express.Router();
 router.use(express.urlencoded({ extended: true }));
 router.use(express.json());
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const rfc = req.body.rfc;
-    const uploadPath = path.join('uploads', rfc);
-
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-
-    cb(null, uploadPath);
-  },
-  filename: function (req, file, cb) {
-    const rfc = req.body.rfc;
-    cb(null, `${rfc}-${Date.now()}${path.extname(file.originalname)}`);
-  }
-});
-
-const upload = multer({ storage: storage });
-
 const verifyRFC = (req, res, next) => {
   console.log('Verificando RFC:', req.body.rfc);
   if (!req.body.rfc) {
@@ -35,14 +16,40 @@ const verifyRFC = (req, res, next) => {
   next();
 };
 
-router.post('/upload', upload.single('file'), verifyRFC, (req, res) => {
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const rfc = req.body.rfc;
+    console.log('RFC en storage:', rfc);
+
+    if (!rfc) {
+      return cb(new Error('RFC is required'), null);
+    }
+
+    const uploadPath = path.join('uploads', rfc);
+
+    // Crea el directorio si no existe
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+
+    cb(null, uploadPath);
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  }
+});
+
+const upload = multer({ storage: storage });
+
+router.post('/upload', upload.single('file'), (req, res) => {
   console.log('Archivo recibido:', req.file);
-  if (!req.file) {
-    return res.status(400).send({ message: 'Please upload a file' });
+  console.log('Request Body:', req.body);
+  if (!req.body.rfc) {
+    return res.status(400).send({ message: 'Please provide an RFC' });
   }
 
   const rfc = req.body.rfc;
-  const filename = req.file.filename;
+  const filename = req.file.originalname;
   const filePath = path.join('uploads', rfc, filename);
 
   res.send({
