@@ -10,6 +10,7 @@ router.use(express.json());
 
 const verifyRFC = (req, res, next) => {
   console.log('Verificando RFC:', req.body.rfc);
+  console.log('Request Body:', req.body);
   if (!req.body.rfc) {
     return res.status(400).send({ message: 'Please provide an RFC' });
   }
@@ -19,6 +20,7 @@ const verifyRFC = (req, res, next) => {
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const rfc = req.body.rfc;
+    console.log('RFC en storage:', rfc);
 
     if (!rfc) {
       return cb(new Error('RFC is required'), null);
@@ -42,6 +44,7 @@ const upload = multer({ storage: storage });
 
 router.post('/upload', verifyRFC, upload.single('file'), (req, res) => {
   console.log('Archivo recibido:', req.file);
+  console.log('Request Body después de subir el archivo:', req.body);
   if (!req.file) {
     return res.status(400).send({ message: 'Please upload a file' });
   }
