@@ -5,12 +5,12 @@ const uploadRouter = require('./routes/upload_file'); // Asegúrate de que el no
 const app = express();
 const port = 3026;
 
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
 // Configurar multer como middleware global para manejar multipart/form-data
 const upload = multer();
 app.use(upload.none());
-
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
 
 app.use('/upload', uploadRouter);
 
