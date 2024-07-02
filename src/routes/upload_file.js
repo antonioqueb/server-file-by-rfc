@@ -28,6 +28,7 @@ const upload = multer({ storage: storage });
 
 const verifyRFC = (req, res, next) => {
   console.log('Verificando RFC:', req.body.rfc);
+  console.log('Request body:', req.body); // Añadir esta línea para verificar el cuerpo de la solicitud
   if (!req.body.rfc) {
     return res.status(400).send({ message: 'Por favor proporciona un RFC' });
   }
