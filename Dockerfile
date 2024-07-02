@@ -16,7 +16,7 @@ RUN npm install
 COPY . .
 
 # Expose the port the app runs on.
-EXPOSE 3009
+EXPOSE 3026
 
 # Run the web service on container startup.
 CMD [ "npm", "start" ]
