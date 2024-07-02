@@ -8,10 +8,6 @@ const port = 3026;
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Configurar multer como middleware global para manejar multipart/form-data
-const upload = multer();
-app.use(upload.none());
-
 app.use('/upload', uploadRouter);
 
 app.listen(port, () => {

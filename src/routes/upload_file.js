@@ -26,7 +26,7 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage: storage }).any();
 
 const verifyRFC = (req, res, next) => {
   console.log('Verificando RFC');
@@ -40,7 +40,7 @@ const verifyRFC = (req, res, next) => {
   next();
 };
 
-router.post('/', upload.any(), (req, res, next) => {
+router.post('/', upload, (req, res, next) => {
   console.log('Middleware upload.any() completado');
   next();
 }, verifyRFC, (req, res) => {
