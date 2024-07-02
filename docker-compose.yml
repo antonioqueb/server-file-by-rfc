@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  file-uploader:
+    build: .
+    container_name: file_uploader_service
+    ports:
+      - "3025:3011"
+    volumes:
+      - file_uploads_data:/usr/src/app/uploads
+    environment:
+      - NODE_ENV=development
+
+  file-uploader-nginx:
+    image: nginx:latest
+    container_name: file_uploader_nginx
+    ports:
+      - "3026:83"
+    volumes:
+      - ./nginx/nginx_file.conf:/etc/nginx/nginx.conf:ro
+      - file_uploads_data:/usr/share/nginx/html/uploads
+    depends_on:
+      - file-uploader
+
+volumes:
+  file_uploads_data:
